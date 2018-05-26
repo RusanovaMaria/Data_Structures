@@ -2,19 +2,7 @@ package ru.datastructures.binarytree;
 
 public class BinaryTree {
 
-    private class BinaryTreeElement {
-        int value;
-        BinaryTreeElement right;
-        BinaryTreeElement left;
-
-        BinaryTreeElement(int value) {
-            this.value = value;
-            right = null;
-            left = null;
-        }
-    }
-
-    private BinaryTreeElement root;
+    BinaryTreeElement root;
 
     public void addElement(int value) {
         if (root == null) {
@@ -27,9 +15,9 @@ public class BinaryTree {
 
     private void add(int value, BinaryTreeElement parent) {
         if (parent.value < value) {
-           addToLeftOrPass(value, parent);
+            addToRightOrPass(value, parent);
         } else {
-           addToTheRightOrPass(value, parent);
+            addToLeftOrPass(value, parent);
         }
     }
 
@@ -42,7 +30,7 @@ public class BinaryTree {
         }
     }
 
-    private void addToTheRightOrPass(int value, BinaryTreeElement parent) {
+    private void addToRightOrPass(int value, BinaryTreeElement parent) {
         if (parent.right == null) {
             BinaryTreeElement element = new BinaryTreeElement(value);
             parent.right = element;
@@ -51,44 +39,51 @@ public class BinaryTree {
         }
     }
 
-    private void removeElement(int value) {
-        BinaryTreeElement removableElement = root;
-        BinaryTreeElement parentOfRemovableElement = root;
+    public void removeElement(int value) {
+        BinaryTreeElement removableElement = this.root;
+        BinaryTreeElement parentOfRemovableElement = this.root;
 
-        while(removableElement.value != value) {
+        while (removableElement.value != value) {
             parentOfRemovableElement = removableElement;
-            removableElement = (removableElement.value < value) ? removableElement.left : removableElement.right;
+            removableElement = (removableElement.value < value) ? removableElement.right : removableElement.left;
         }
         remove(parentOfRemovableElement, removableElement);
     }
 
     private void remove(BinaryTreeElement parent, BinaryTreeElement element) {
         if (element.equals(root)) {
-            removeElementWithTwoSubtrees(element);
+            removeElementWithTwoSubtrees(parent, element);
         } else {
             if (isLeaf(element)) {
                 removeList(parent, element);
-            } else if(isElementWithOneSubtree(element)) {
+            } else if (isElementWithOneSubtree(element)) {
                 removeElementWithOneSubtree(parent, element);
-            } else if(isElementWithTwoSubtrees(element)) {
-                removeElementWithTwoSubtrees(element);
+            } else if (isElementWithTwoSubtrees(element)) {
+                removeElementWithTwoSubtrees(parent, element);
             }
         }
     }
 
     private void removeList(BinaryTreeElement parent, BinaryTreeElement element) {
-        if (parent.left.value == element.value) {
+        if (isLeftChild(parent, element)) {
             parent.left = null;
         } else {
             parent.right = null;
         }
     }
 
+    private boolean isLeftChild(BinaryTreeElement parent, BinaryTreeElement element) {
+        if ((parent.left != null) && (parent.left.equals(element))) {
+            return true;
+        }
+        return false;
+    }
+
     private void removeElementWithOneSubtree(BinaryTreeElement parent, BinaryTreeElement element) {
         if (parent.left.value == element.value) {
             outweighToTheLeft(parent, element);
         } else {
-           outweighToTheRight(parent, element);
+            outweighToTheRight(parent, element);
         }
     }
 
@@ -108,24 +103,30 @@ public class BinaryTree {
         }
     }
 
-    private void removeElementWithTwoSubtrees(BinaryTreeElement element) {
+    private void removeElementWithTwoSubtrees(BinaryTreeElement parent, BinaryTreeElement element) {
         BinaryTreeElement leftmostElement = searchLeftmostElementInRightSubtree(element);
-
-        if (isLeftmostElementInRightSubtreeLeaf(element)) {
-            element = leftmostElement;
+        BinaryTreeElement parentLeftmostElement = searchParentLeftmostElementInRightSubtree(element);
+        if (leftmostElement == null) {
+            parent.right = element.right;
+            parent.right.left = element.left;
+            if (element.value == root.value) {
+                root = parent.right;
+            }
+        } else if (isLeftmostElementInRightSubtreeLeaf(element)) {
+            removeList(parentLeftmostElement, leftmostElement);
+            element.value = leftmostElement.value;
         } else {
-            BinaryTreeElement parentLeftmostElement = searchParentLeftmostElementInRightSubtree(element);
             removeElementWithOneSubtree(parentLeftmostElement, leftmostElement);
-            element = leftmostElement;
+            element.value = leftmostElement.value;
         }
     }
 
     private boolean isLeftmostElementInRightSubtreeLeaf(BinaryTreeElement element) {
         BinaryTreeElement leftmostElement = searchLeftmostElementInRightSubtree(element);
 
-            if(isLeaf(leftmostElement)) {
-                return true;
-            }
+        if (isLeaf(leftmostElement)) {
+            return true;
+        }
         return false;
     }
 
@@ -137,7 +138,7 @@ public class BinaryTree {
                 leftmostElement = leftmostElement.left;
             }
         }
-            return leftmostElement;
+        return leftmostElement;
     }
 
     private BinaryTreeElement searchParentLeftmostElementInRightSubtree(BinaryTreeElement element) {
@@ -145,7 +146,7 @@ public class BinaryTree {
         BinaryTreeElement parentLeftmostElement = null;
         if (element.right.left != null) {
             leftmostElement = element.right.left;
-            parentLeftmostElement = element.right.left;
+            parentLeftmostElement = element.right;
             while (leftmostElement.left != null) {
                 parentLeftmostElement = leftmostElement;
                 leftmostElement = leftmostElement.left;
@@ -162,7 +163,7 @@ public class BinaryTree {
     }
 
     private boolean isElementWithOneSubtree(BinaryTreeElement element) {
-        if((isElementWithLeftSubtree(element)) || (isElementWithRightSubtree(element))) {
+        if ((isElementWithLeftSubtree(element)) || (isElementWithRightSubtree(element))) {
             return true;
         }
         return false;
