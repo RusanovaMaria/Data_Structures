@@ -168,7 +168,7 @@ public class HashMap<K, V> implements Map<K, V> {
 
     @Override
     public int size() {
-        return fullBuckets;
+        return size;
     }
 
     @Override
@@ -182,7 +182,7 @@ public class HashMap<K, V> implements Map<K, V> {
             index = indexFor(hash, table.length);
         }
         Entry<K, V> entry = table[index];
-        Entry<K, V> previousEntry = table[index];
+        Entry<K, V> previousEntry = null;
 
         if (!isNullEntry(entry)) {
             size--;
@@ -195,9 +195,13 @@ public class HashMap<K, V> implements Map<K, V> {
             }
             do {
                 if (entry.containsByKey(key)) {
-                    previousEntry.next = entry.next;
-                    V value = entry.value;
-                    return value;
+                    if (isNullEntry(previousEntry)) {
+                        table[index] = entry.next;
+                    } else {
+                        previousEntry.next = entry.next;
+                        V value = entry.value;
+                        return value;
+                    }
                 }
                 previousEntry = entry;
                 entry = entry.next;
