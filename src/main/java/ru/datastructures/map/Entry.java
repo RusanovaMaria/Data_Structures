@@ -14,7 +14,7 @@ public class Entry<K, V> {
        this.next = next;
    }
 
-   boolean containsByHashAndValue(Object key, int hash) {
+   boolean containsByHashAndKey(Object key, int hash) {
        if (this.hash == hash && (this.key == key || key.equals(this.key))) {
            return true;
        }

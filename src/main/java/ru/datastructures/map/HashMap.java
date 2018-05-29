@@ -135,7 +135,7 @@ public class HashMap<K, V> implements Map<K, V> {
 
         if (!isNullEntry(entry)) {
             do {
-                if (entry.containsByHashAndValue(key, hash)) {
+                if (entry.containsByHashAndKey(key, hash)) {
                     return entry;
                 }
                 entry = entry.next;
