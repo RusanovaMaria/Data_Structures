@@ -109,15 +109,6 @@ public class HashMap<K, V> implements Map<K, V> {
         }
     }
 
-    private int indexFor(int hash, int length) {
-        return hash % length;
-    }
-
-    private int hash(int hashCode) {
-        int index = (hashCode & Integer.MAX_VALUE);
-        return index;
-    }
-
     private void addEntry(K key, V value, int hash, int index) {
         Entry<K, V> entry = table[index];
         table[index] = new Entry(key, value, hash, entry);
@@ -181,36 +172,14 @@ public class HashMap<K, V> implements Map<K, V> {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (o == null) {
-            return false;
-        }
-        if (!(o instanceof HashMap)) {
-            return false;
-        }
-        HashMap map = (HashMap) o;
-        return ((map.hashCode() == hashCode()) && (table.equals(map.table)) && (threshold == map.threshold));
-    }
-
-    @Override
-    public int hashCode() {
-        int result = 17;
-        result = 31 * result + Double.hashCode(loadFactor);
-        result = 31 * result + Integer.hashCode(capacity);
-        result = 31 * result + Integer.hashCode(fullBuckets);
-        result = 31 * result + Integer.hashCode(threshold);
-        result = 31 * result + table.hashCode();
-        return result;
-    }
-
-    @Override
     public V remove(Object key) {
         int index;
 
         if (isNullKey(key)) {
             index = 0;
         } else {
-            index = indexFor(key.hashCode(), table.length);
+            int hash = hash(key.hashCode());
+            index = indexFor(hash, table.length);
         }
         Entry<K, V> entry = table[index];
         Entry<K, V> previousEntry = table[index];
@@ -284,6 +253,38 @@ public class HashMap<K, V> implements Map<K, V> {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        if (!(o instanceof HashMap)) {
+            return false;
+        }
+        HashMap map = (HashMap) o;
+        return ((map.hashCode() == hashCode()) && (table.equals(map.table)) && (threshold == map.threshold));
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = 31 * result + Double.hashCode(loadFactor);
+        result = 31 * result + Integer.hashCode(capacity);
+        result = 31 * result + Integer.hashCode(fullBuckets);
+        result = 31 * result + Integer.hashCode(threshold);
+        result = 31 * result + table.hashCode();
+        return result;
+    }
+
+    private int indexFor(int hash, int length) {
+        return hash % length;
+    }
+
+    private int hash(int hashCode) {
+        int index = (hashCode & Integer.MAX_VALUE);
+        return index;
     }
 
     private boolean isNullKey(Object key) {
